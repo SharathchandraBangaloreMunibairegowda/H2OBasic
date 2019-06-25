@@ -1,0 +1,67 @@
+---
+title: "H2O Machine Learning."
+author: "Sharathchandra BM"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+I will be writing a simple code below to install h2o package, hosting the h2o server, performing analysis using machine learning algorithm and finally creating a high accuracy model.
+
+Install h2o package by running the command install.packages("h2o") and follow up with code below. Initiating H2O with all cores in use and max memory of 4 GB allocated from the system - Getting an error as memory is exceeding and H2O works better in 64-bit JAVA. 
+
+You can access the server hosted on the localhost. By hitting the URL, http://localhost:54321/flow/index.html and all the below operations can be carried on. 
+
+H2O Cloudframe is open source and provides great results with reliable machine learning algorithms inbuilt in the package. 
+
+Invoking the library and running the h2o server.
+```{r}
+library(h2o)
+h2o.init(nthreads = -1)
+```
+
+Reading a data spreadsheet to H2O Cloud Reading from URL or from local. Thus, I have imported data from local.
+```{r}
+dataset <- h2o.importFile("C:/Users/Sharathchandra B M/Desktop/iris_wheader.csv",destination_frame = "tryout")
+```
+
+Predicting values for column - "class", thus assigning that column
+```{r}
+y <- "class"
+x <- setdiff(names(dataset), y)
+```
+
+Splitting of dataset. To create test dataset and train dataset. Train dataset has 80% of data and test dataset has 20% of data.
+```{r}
+parts <- h2o.splitFrame(dataset,0.8)
+train <- parts[[1]]
+test <- parts[[2]]
+```
+
+Fitted Model created based on values got from train dataset.
+```{r}
+model <- h2o.deeplearning(x,y,train,model_id = "ModelusingDeepLearning")
+summary(model)
+```
+
+Predict values and check alongside test data (Testing the model). Confusion Matrix has been displayed.
+```{r}
+predict <- h2o.predict(model,test)
+h2o.confusionMatrix(model)
+```
+
+Creating a dataframe of predicted values and actual values
+```{r}
+display <- as.data.frame(h2o.cbind(predict$predict,test$class))
+display
+```
+
+Accuracy of the model
+```{r}
+mean(predict$predict==test$class)
+```
+
+Shutdown the h2o server instance.
+```{r}
+h2o.shutdown()
+```
